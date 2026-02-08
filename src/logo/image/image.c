@@ -215,6 +215,7 @@ static bool printImageKittyIcat(bool printError)
             "icat",
             "-n",
             "--align=left",
+            "--engine=magick",
             options->source.chars,
             NULL,
         });

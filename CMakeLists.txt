@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.12.0) # target_link_libraries with OBJECT libs & project homepage url
 
 project(fastfetch
-    VERSION 2.58.0
+    VERSION 2.59.0
     LANGUAGES C
     DESCRIPTION "Fast neofetch-like system information tool"
     HOMEPAGE_URL "https://github.com/fastfetch-cli/fastfetch"
@@ -1325,6 +1325,10 @@ endif()
 if(NOT WIN32)
     check_function_exists(pipe2 HAVE_PIPE2)
 endif()
+check_function_exists(memrchr HAVE_MEMRCHR)
+if(NOT HAVE_MEMRCHR)
+    list(APPEND LIBFASTFETCH_SRC src/common/impl/memrchr.c)
+endif()
 
 if(ENABLE_SYSTEM_YYJSON)
     find_package(yyjson)
@@ -1671,6 +1675,9 @@ if(ENABLE_LIBZFS)
             PRIVATE "zfs"
         )
     endif()
+endif()
+if(NOT HAVE_MEMRCHR)
+    target_compile_definitions(libfastfetch PRIVATE FF_HAVE_CUSTOM_MEMRCHR=1)
 endif()
 
 if(LINUX)
@@ -2104,7 +2111,7 @@ if(LINUX)
             set(CPACK_RPM_PACKAGE_LICENSE "MIT")
         endif()
     endif()
-elseif(FreeBSD)
+elseif(FreeBSD AND NOT DragonFly)
     set(CPACK_FREEBSD_PACKAGE_LICENSE "MIT")
     set(CPACK_GENERATOR "${CPACK_GENERATOR};FREEBSD")
 endif()
